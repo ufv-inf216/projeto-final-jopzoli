@@ -1,0 +1,6 @@
+
+[2023-10-07]
+ - gerenciadores de memória, eg. memory pool (buddy block), stack_array, garbage_collector
+ - ref_counter
+ - memory_pool é lista encadeada de varias pools de diferentes tamanhos
+ - contigous_storage é memoria paginada esilo deque
