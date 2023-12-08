@@ -88,23 +88,23 @@ private:
 class ModelLoader
 {
 public:
-	NODISCARD static std::pmr::vector<StaticMesh> load(const std::string_view _path);
+	NODISCARD static std::pmr::vector<object_ptr<StaticMesh>> load(const std::string_view _path);
 
 	static void xReadModelFileError(const std::string_view& _msg);
 
 private:
 	static void _processNode(
 		const std::string_view& _path,
-		std::pmr::vector<StaticMesh>& _buffer,
+		std::pmr::vector<object_ptr<StaticMesh>>& _buffer,
 		aiNode* _node,
 		const aiScene* _scene);
-	static StaticMesh _processMesh(
+	static StaticMesh* _processMesh(
 		const std::string_view& _path,
 		aiMesh* _mesh,
 		const aiScene* _scene);
 	static void _loadTextureMaterial(
 		const std::string_view& _path,
-		std::pmr::vector<Texture>& _buffer,
+		std::pmr::vector<object_ptr<Texture>>& _buffer,
 		aiMaterial* _material,
 		aiTextureType _type);
 };

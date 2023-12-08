@@ -1,6 +1,6 @@
 #include "logger.hpp"
 
-std::pmr::vector<Logger> Logger::instances(singleton_memory::getPool( ));
+std::pmr::vector<Logger> Logger::instances{ singleton_memory::getAssynchronousPool( ) };
 
 Logger::Logger(
 	std::ostream& _os,

@@ -5,9 +5,12 @@
 #pragma once
 
 #include "actor/actor.hpp"
-#include "game.hpp"
 #include "object/object.hpp"
-#include <unordered_map>
+#include "thirdparty/eventfilter.hpp"
+#include "thirdparty/renderer.hpp"
+#include <deque>
+#include <map>
+#include <vector>
 
 class Scene
 	: public Object
@@ -15,40 +18,65 @@ class Scene
 public:
 	OBJIMPL( );
 
-	Scene(Game* _game);
-
-	NODISCARD bool isActive( ) const noexcept
+	enum Status
 	{
-		return m_isActive;
-	}
+		Active,
+		Inactive
+	};
 
-	void addActor(const not_null<Actor>& _actor);
+	Scene(class Game* _game);
 
-	template <typename _IterTy>
-	void addActors(_IterTy _first, _IterTy _last)
+	NODISCARD Status status( ) const noexcept
 	{
-		for (auto& i : std::ranges::subrange{ _first, _last })
-			addActor(i);
+		return m_status;
 	}
+	
+	void play( ) noexcept;
 
-	void removeActor(const not_null<Actor>& _actor);
+	void pause( ) noexcept;
 
-	template <typename _IterTy>
-	void removeActors(_IterTy _first, _IterTy _last)
-	{
-		for (auto& i : std::ranges::subrange{ _first, _last })
-			removeActor(i);
-	}
+	virtual void onPlay( ) noexcept
+	{ }
 
-	template <typename _Ty>
-		requires std::derived_from<_Ty, Actor>
-	void removeActors( ) noexcept
-	{
-		m_actors.erase(typeid(_Ty));
-	}
+	virtual void onPause( ) noexcept
+	{ }
+
+	virtual void onAudioDeviceEvent(SDL_AudioDeviceEvent& _e)
+	{ }
+
+	virtual void onKeyboardEvent(SDL_KeyboardEvent& _e)
+	{ }
+
+	virtual void onMouseButtonEvent(SDL_MouseButtonEvent& _e)
+	{ }
+
+	virtual void onMouseMotionEvent(SDL_MouseMotionEvent& _e)
+	{ }
+
+	virtual void onMouseWheelEvent(SDL_MouseWheelEvent& _e)
+	{ }
+
+	virtual void onQuitEvent(SDL_QuitEvent& _e)
+	{ }
+
+	virtual void onSysWMEvent(SDL_SysWMEvent& _e)
+	{ }
+
+	virtual void onWindowEvent(SDL_WindowEvent& _e)
+	{ }
+
+	void tick(float _deltaTime);
+
+protected:
+	std::pmr::map<int, object_ptr<Actor>> actors;
+	Game* game;
+
+	virtual void tickScene(float _deltaTime)
+	{ }
 
 private:
-	std::pmr::map<std::type_index, std::pmr::vector<object_ptr<Actor>>> m_actors;
-	bool m_isActive;
+	Status m_status;
+
+	void _tickActors(float _deltaTime);
 };
 OBJDECL(Scene, Object);

@@ -1,30 +1,18 @@
 #include "modelcomponent.hpp"
 
-ModelComponent::ModelComponent(std::pmr::vector<StaticMesh>&& _meshes) noexcept
-	: m_meshes{ std::move(_meshes), singleton_memory::getPool( ) },
+ModelComponent::ModelComponent(meshes_type&& _meshes) noexcept
+	: m_meshes{ std::move(_meshes), singleton_memory::getAssynchronousPool( ) },
 	m_shader{ }
 { }
 
-NODISCARD const std::pmr::vector<StaticMesh>& ModelComponent::meshes( ) const noexcept
+void ModelComponent::setShader(ShaderProgram* _shader) noexcept
 {
-	return m_meshes;
+	m_shader = _shader;
 }
 
-void ModelComponent::useShader(const not_null<ShaderProgram>& _shader) noexcept
-{
-	m_shader = _shader.get( );
-}
-
-void ModelComponent::tick(float _deltaTime)
-{
-	_draw( );
-}
-
-void ModelComponent::_draw( ) noexcept
+void ModelComponent::tickComponent(float _deltaTime)
 {
 	_EXPECTS(m_shader, "model was not configured with any shader program");
-	for (auto& i : m_meshes)
-	{
-		i.draw(*m_shader);
-	}
+	for (auto& mesh : m_meshes)
+		mesh->draw(m_shader);
 }

@@ -4,7 +4,7 @@
 
 #define INLINE_BUFFER_SIZE	512
 
-ShaderProgram ShaderProgram::create(
+ShaderProgram* ShaderProgram::create(
 	const std::string_view& _vertexShaderSrc,
 	const std::string_view& _fragmentShaderSrc)
 {
@@ -34,7 +34,7 @@ ShaderProgram ShaderProgram::create(
 			+ _getLinkLog(programId));
 	}
 
-	return ShaderProgram{ programId };
+	return new ShaderProgram{ programId };
 }
 
 void ShaderProgram::xCompileError(const std::string_view& _msg)
@@ -58,7 +58,7 @@ program_id_t ShaderProgram::programId( ) const noexcept
 
 const std::pmr::vector<attrib_info> ShaderProgram::activeAttribs( ) const noexcept
 {
-	std::pmr::vector<attrib_info> attribs{ singleton_memory::getPool( ) };
+	std::pmr::vector<attrib_info> attribs{ singleton_memory::getAssynchronousPool( ) };
 	for (GLuint i = 0; i < _getActiveAttribCount( ); i++)
 		attribs.push_back(_getActiveAttribInfo(i));
 
@@ -67,7 +67,7 @@ const std::pmr::vector<attrib_info> ShaderProgram::activeAttribs( ) const noexce
 
 const std::pmr::vector<uniform_info> ShaderProgram::activeUniforms( ) const noexcept
 {
-	std::pmr::vector<uniform_info> uniforms{ singleton_memory::getPool( ) };
+	std::pmr::vector<uniform_info> uniforms{ singleton_memory::getAssynchronousPool( ) };
 	for (GLuint i = 0; i < _getActiveUniformCount( ); i++)
 		uniforms.push_back(_getActiveUniformInfo(i));
 
@@ -393,18 +393,18 @@ void ShaderProgram::_deleteShader(GLuint _shaderId) noexcept
 
 bool ShaderProgram::_validateProgram(GLuint _program) noexcept
 {
-	GLint status;
-	glGetProgramiv(_program, GL_LINK_STATUS, &status);
+	GLint m_status;
+	glGetProgramiv(_program, GL_LINK_STATUS, &m_status);
 
-	return status == GL_TRUE;
+	return m_status == GL_TRUE;
 }
 
 bool ShaderProgram::_validateShader(GLuint _shader) noexcept
 {
-	GLint status;
-	glGetShaderiv(_shader, GL_COMPILE_STATUS, &status);
+	GLint m_status;
+	glGetShaderiv(_shader, GL_COMPILE_STATUS, &m_status);
 
-	return status == GL_TRUE;
+	return m_status == GL_TRUE;
 }
 
 size_t ShaderProgram::_getActiveAttribCount( ) const noexcept

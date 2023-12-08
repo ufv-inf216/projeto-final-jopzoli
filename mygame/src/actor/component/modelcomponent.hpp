@@ -13,18 +13,27 @@ class ModelComponent
 public:
 	OBJIMPL( );
 
-	ModelComponent(std::pmr::vector<StaticMesh>&& _meshes) noexcept;
+	using meshes_type = std::pmr::vector<object_ptr<StaticMesh>>;
 
-	NODISCARD const std::pmr::vector<StaticMesh>& meshes( ) const noexcept;
+	ModelComponent(meshes_type&& _meshes) noexcept;
 
-	void useShader(const not_null<ShaderProgram>& _shader) noexcept;
+	NODISCARD const std::pmr::vector<object_ptr<StaticMesh>>& meshes( ) const noexcept
+	{
+		return m_meshes;
+	}
 
-	void tick(float _deltaTime) override;
+	NODISCARD ShaderProgram* shader( ) const noexcept
+	{
+		return m_shader;
+	}
+
+	void setShader(ShaderProgram* _shader) noexcept;
+
+protected:
+	void tickComponent(float _deltaTime) override;
 
 private:
-	std::pmr::vector<StaticMesh> m_meshes;
+	meshes_type m_meshes;
 	ShaderProgram* m_shader;
-
-	void _draw( ) noexcept;
 };
 OBJDECL(ModelComponent, Component);

@@ -11,6 +11,7 @@
         "CMAKE_C_COMPILER": "cl.exe",
         "CMAKE_CXX_COMPILER": "cl.exe",
         "SDL2_DIR": "C:\\Users\\secjo\\Downloads\\zip\\SDL2-2.28.5\\cmake",
+        "SDL2_mixer_DIR": "C:\\Users\\secjo\\Downloads\\SDL2_mixer-2.6.3\\cmake",
         "assimp_DIR": "C:\\Program Files\\Assimp"
       },
       "condition": {

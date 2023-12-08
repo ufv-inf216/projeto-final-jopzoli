@@ -156,17 +156,30 @@ struct linked_stack
 
 struct singleton_memory
 {
-	NODISCARD static std::pmr::synchronized_pool_resource* getPool( )
-	{
-		static std::pmr::synchronized_pool_resource pool{ };
+	static std::pmr::unsynchronized_pool_resource assynchronousPool;
 
-		return &pool;
+	static std::pmr::synchronized_pool_resource synchronousPool;
+
+	NODISCARD static std::pmr::memory_resource* getAssynchronousPool( )
+	{
+		return &assynchronousPool;
 	}
 
 	template <typename _Ty>
-	NODISCARD static std::pmr::polymorphic_allocator<_Ty> getAllocator( )
+	NODISCARD static std::pmr::polymorphic_allocator<_Ty> getAssynchronousAllocator( )
 	{
-		return { getPool( ) };
+		return { getAssynchronousPool( ) };
+	}
+
+	NODISCARD static std::pmr::memory_resource* getSynchronousPool( )
+	{
+		return &synchronousPool;
+	}
+
+	template <typename _Ty>
+	NODISCARD static std::pmr::polymorphic_allocator<_Ty> getSynchronousAllocator( )
+	{
+		return { getSynchronousPool( ) };
 	}
 };
 

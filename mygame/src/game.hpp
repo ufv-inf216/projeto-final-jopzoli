@@ -6,7 +6,7 @@
 
 #include "thirdparty/renderer.hpp"
 #include "thirdparty/eventfilter.hpp"
-#include "actor/camera/camera.hpp"
+#include "scene/scene.hpp"
 
 class Game
 {
@@ -14,7 +14,7 @@ public:
 	enum RuntimeStatus
 	{
 		Running,
-		Paused,
+		Inactive,
 		Halted,
 		Quit
 	};
@@ -28,14 +28,16 @@ public:
 
 	NODISCARD EventFilter& eventFilter( ) noexcept;
 
+	void quit( ) noexcept;
+
 	void run( );
 
 private:
-	RuntimeStatus status;
-	Camera camera;
-	//Scene m_scene; // TODO: stack
+	object_ptr<Scene> m_currentScene;
 	EventFilter m_eventFilter;
 	Renderer m_renderer;
+	uint32_t m_ticksPassed;
+	RuntimeStatus m_status;
 
 	void _registerEventHandlers( );
 	void _onAudioDeviceEvent(SDL_AudioDeviceEvent& _e);

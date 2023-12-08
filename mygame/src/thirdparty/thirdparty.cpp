@@ -2,14 +2,14 @@
 
 bool opengl_resources::initializeGLEW( ) noexcept
 {
-	static bool status = false;
-	if (!status)
+	static bool m_status = false;
+	if (!m_status)
 	{
-		status = glewInit( ) == GLEW_OK;
+		m_status = glewInit( ) == GLEW_OK;
 		glGetError( );
 	}
 
-	return status;
+	return m_status;
 }
 
 sdl_resources::SubSystem sdl_resources::initializeSubsystem(SubSystem _flags) noexcept

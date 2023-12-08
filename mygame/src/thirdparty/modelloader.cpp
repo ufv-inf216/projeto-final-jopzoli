@@ -6,7 +6,7 @@
 
 namespace /* anonymous */
 {
-std::pmr::vector<std::string> loadedTextures{ singleton_memory::getPool( ) };
+std::pmr::vector<std::string> loadedTextures{ singleton_memory::getAssynchronousPool( ) };
 }
 
 // TODO: exceptions
@@ -92,10 +92,10 @@ void Image::_freeImage(void* _data) noexcept
 	stbi_image_free(_data);
 }
 
-std::pmr::vector<StaticMesh> ModelLoader::load(const std::string_view _path)
+std::pmr::vector<object_ptr<StaticMesh>> ModelLoader::load(const std::string_view _path)
 {
 	stbi_set_flip_vertically_on_load(true);
-	std::pmr::vector<StaticMesh> buffer;
+	std::pmr::vector<object_ptr<StaticMesh>> buffer;
 
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(
@@ -124,7 +124,7 @@ void ModelLoader::xReadModelFileError(const std::string_view& _msg)
 
 void ModelLoader::_processNode(
 	const std::string_view& _path,
-	std::pmr::vector<StaticMesh>& _buffer,
+	std::pmr::vector<object_ptr<StaticMesh>>& _buffer,
 	aiNode* _node,
 	const aiScene* _scene)
 {
@@ -133,21 +133,21 @@ void ModelLoader::_processNode(
 	for (size_t i = 0; i < _node->mNumMeshes; i++)
 	{
 		mesh = _scene->mMeshes[_node->mMeshes[i]];
-		_buffer.push_back(_processMesh(_path, mesh, _scene));
+		_buffer.emplace_back(_processMesh(_path, mesh, _scene));
 	}
 
 	for (size_t i = 0; i < _node->mNumChildren; i++)
 		_processNode(_path, _buffer, _node->mChildren[i], _scene);
 }
 
-StaticMesh ModelLoader::_processMesh(
+StaticMesh* ModelLoader::_processMesh(
 	const std::string_view& _path,
 	aiMesh* _mesh,
 	const aiScene* _scene)
 {
-	std::pmr::vector<vertex> vertices{ singleton_memory::getPool( ) };
-	std::pmr::vector<vertex_id_t> indices{ singleton_memory::getPool( ) };
-	std::pmr::vector<Texture> textures{ singleton_memory::getPool( ) };
+	std::pmr::vector<vertex> vertices{ singleton_memory::getAssynchronousPool( ) };
+	std::pmr::vector<vertex_id_t> indices{ singleton_memory::getAssynchronousPool( ) };
+	std::pmr::vector<object_ptr<Texture>> textures{ singleton_memory::getAssynchronousPool( ) };
 
 	vertices.reserve(_mesh->mNumVertices);
 	for (size_t i = 0; i < _mesh->mNumVertices; i++)
@@ -221,7 +221,7 @@ StaticMesh ModelLoader::_processMesh(
 
 void ModelLoader::_loadTextureMaterial(
 	const std::string_view& _path,
-	std::pmr::vector<Texture>& _buffer,
+	std::pmr::vector<object_ptr<Texture>>& _buffer,
 	aiMaterial* _material,
 	aiTextureType _type)
 {
@@ -347,7 +347,7 @@ void ModelLoader::_loadTextureMaterial(
 		path += str.C_Str( );
 		Image img = Image::load(path);
 
-		_buffer.push_back(Texture::create(
+		_buffer.emplace_back(Texture::create(
 			img.data( ),
 			img.width( ),
 			img.height( ),

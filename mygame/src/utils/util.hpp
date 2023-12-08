@@ -171,18 +171,18 @@ public:
 	constexpr not_null(_OtherTy&& _ptr) noexcept(
 		std::is_nothrow_move_constructible_v<_OtherTy>
 		)
-		: m_ptr{ std::forward<_OtherTy>(_ptr) }
+		: ptr{ std::forward<_OtherTy>(_ptr) }
 	{
-		_EXPECTS(m_ptr != nullptr, "given pointer can't be nullptr");
+		_EXPECTS(ptr != nullptr, "given pointer can't be nullptr");
 	}
 
 	template <typename = std::enable_if_t<!std::is_same_v<std::nullptr_t, pointer_type>>>
 	constexpr not_null(pointer_type _ptr) noexcept(
 		std::is_nothrow_move_constructible_v<pointer_type>
 		)
-		: m_ptr{ std::move(_ptr) }
+		: ptr{ std::move(_ptr) }
 	{
-		_EXPECTS(m_ptr != nullptr, "given pointer can't be nullptr");
+		_EXPECTS(ptr != nullptr, "given pointer can't be nullptr");
 	}
 
 	template <typename _OtherTy, typename = std::enable_if_t<std::is_convertible_v<_OtherTy, value_type>>>
@@ -197,23 +197,22 @@ public:
 	not_null(std::nullptr_t) = delete;
 	not_null& operator=(std::nullptr_t) = delete;
 
-	_NODISCARD constexpr const detail::value_or_reference_return_t<pointer_type> get( ) const noexcept(
-		noexcept(detail::value_or_reference_return_t<pointer_type>{std::declval<pointer_type&>( )})
-		)
+	NODISCARD constexpr detail::value_or_reference_return_t<pointer_type> get( ) const noexcept(
+		noexcept(detail::value_or_reference_return_t<pointer_type>{ std::declval<pointer_type&>( ) }))
 	{
-		return m_ptr;
+		return ptr;
 	}
-
+	
 	constexpr decltype(auto) operator->( ) const
 	{
 		return get( );
 	}
-
+	
 	constexpr decltype(auto) operator*( ) const
 	{
 		return *get( );
 	}
-
+	
 	not_null& operator++( ) = delete;
 	not_null& operator--( ) = delete;
 	not_null operator++(int) = delete;
@@ -223,7 +222,7 @@ public:
 	void operator[](std::ptrdiff_t) const = delete;
 
 private:
-	pointer_type m_ptr;
+	pointer_type ptr;
 };
 
 template <typename _Ty>

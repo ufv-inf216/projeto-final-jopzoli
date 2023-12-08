@@ -2,6 +2,23 @@
 #include "renderer.hpp"
 #include "utils/logger.hpp"
 
+Renderer* Renderer::current = nullptr;
+
+void Renderer::setPerspectiveMatrix(mat4 _matrix) noexcept
+{
+	getCurrentShader( )->setFloatMat4("projection", _matrix);
+}
+
+void Renderer::setViewMatrix(mat4 _matrix) noexcept
+{
+	getCurrentShader()->setFloatMat4("view", _matrix);
+}
+
+void Renderer::setModelMatrix(mat4 _matrix) noexcept
+{
+	getCurrentShader( )->setFloatMat4("model", _matrix);
+}
+
 Renderer::Renderer( ) noexcept
 	: m_glContext{ },
 	m_window{ }
@@ -27,7 +44,7 @@ bool Renderer::initialize(
 	{
 		log = "could not initialize SDL resource Video, SDL got message: ";
 		log += SDL_GetError( );
-		Logger::w(log);
+		Logger::warn(log);
 
 		return false;
 	}
@@ -38,7 +55,7 @@ bool Renderer::initialize(
 		{
 			log = "could not set GL attributes, SDL got message: ";
 			log += SDL_GetError( );
-			Logger::w(log);
+			Logger::warn(log);
 
 			return false;
 		}
@@ -55,7 +72,7 @@ bool Renderer::initialize(
 	{
 		log = "could create data SDL window, SDL got message: ";
 		log += SDL_GetError( );
-		Logger::w(log);
+		Logger::warn(log);
 		return false;
 	}
 
@@ -71,14 +88,14 @@ bool Renderer::initialize(
 		{
 			log = "could create data GL context, SDL got message: ";
 			log += SDL_GetError( );
-			Logger::w(log);
+			Logger::warn(log);
 			
 			return false;
 		}
 		if (!opengl_resources::initializeGLEW( ))
 		{
 			log = "could initialize GLEW";
-			Logger::w(log);
+			Logger::warn(log);
 			
 			return false;
 		}
@@ -155,12 +172,24 @@ const SDL_Rect Renderer::windowRect( ) const noexcept
 	return rect;
 }
 
-void Renderer::draw( )
+const Renderer::display_info Renderer::displayInfo( ) const noexcept
 {
-	glClearColor(.0f, .0f, .0f, 1.f);
+	_EXPECTS(m_window, "renderer has not been initialized");
+	SDL_DisplayMode mode;
+	SDL_GetWindowDisplayMode(m_window, &mode);
+
+	return { 0, { 0, 0, mode.w, mode.h }, static_cast<uint32_t>(mode.refresh_rate) };
+}
+
+void Renderer::beginDraw( )
+{
+	glClearColor(0.f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	/*glEnable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);*/
+	shader->use( );
+}
+
+void Renderer::endDraw( )
+{
 	SDL_GL_SwapWindow(m_window);
 }
 

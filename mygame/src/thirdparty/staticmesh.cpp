@@ -1,7 +1,7 @@
 #include "memory/monotonicstorage.hpp"
 #include "staticmesh.hpp"
 
-Texture Texture::create(
+Texture* Texture::create(
 	const byte_t* _data,
 	size_t _width,
 	size_t _height,
@@ -14,7 +14,7 @@ Texture Texture::create(
 	_setTextureParameters( );
 	_unbindTexture(id);
 
-	return Texture{ id, _format, _type };
+	return new Texture{ id, _format, _type };
 }
 
 Texture::Texture(texture_id_t _id, Format _format, Type _type) noexcept
@@ -87,10 +87,10 @@ void Texture::_setTextureParameters( ) noexcept
 }
 
 // TODO: mesh binder
-NODISCARD StaticMesh StaticMesh::create(
+StaticMesh* StaticMesh::create(
 	const std::pmr::vector<vertex>& _vertices,
 	const std::pmr::vector<vertex_id_t>& _indices,
-	const std::pmr::vector<Texture>& _textures)
+	const std::pmr::vector<object_ptr<Texture>>& _textures)
 {
 	vo_id_t vao = _allocateVertexArray( );
 	bo_id_t vbo = _allocateBuffer(GL_ARRAY_BUFFER);
@@ -129,13 +129,13 @@ NODISCARD StaticMesh StaticMesh::create(
 	_unbindBuffer(GL_ARRAY_BUFFER, vbo);
 	_unbindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
-	return StaticMesh{ _vertices, _indices, _textures, vao, vbo, ebo };
+	return new StaticMesh{ _vertices, _indices, _textures, vao, vbo, ebo };
 }
 
 StaticMesh::StaticMesh(
 	const std::pmr::vector<vertex>& _vertices,
 	const std::pmr::vector<vertex_id_t>& _indices,
-	const std::pmr::vector<Texture>& _textures,
+	const std::pmr::vector<object_ptr<Texture>>& _textures,
 	vo_id_t _vao,
 	bo_id_t _vbo,
 	bo_id_t _ebo)
@@ -159,7 +159,7 @@ const std::pmr::vector<vertex_id_t> StaticMesh::indices( ) const noexcept
 	return m_indices;
 }
 
-const std::pmr::vector<Texture> StaticMesh::textures( ) const noexcept
+const std::pmr::vector<object_ptr<Texture>> StaticMesh::textures( ) const noexcept
 {
 	return m_textures;
 }
@@ -199,7 +199,7 @@ void StaticMesh::setDrawMode(DrawMode _mode) noexcept
 	m_drawMode = _mode;
 }
 
-void StaticMesh::bindTextures(const ShaderProgram& _shader)
+void StaticMesh::bindTextures(const not_null<ShaderProgram>& _shader)
 {
 	GLuint diffuseNr = 1;
 	GLuint specularNr = 1;
@@ -208,11 +208,10 @@ void StaticMesh::bindTextures(const ShaderProgram& _shader)
 
 	GLuint number;
 	std::string_view name;
-	// deveria ser i = 1???
 	for (size_t i = 0; i < m_textures.size(); i++)
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
-		switch (m_textures[i].m_type)
+		switch (m_textures[i]->m_type)
 		{
 		case Texture::Diffuse:
 		{
@@ -243,12 +242,12 @@ void StaticMesh::bindTextures(const ShaderProgram& _shader)
 			break;
 		}
 
-		_shader.setInt(name.data( ) + std::to_string(number), i);
-		m_textures[i].bind( );
+		_shader->setInt(name.data( ) + std::to_string(number), i);
+		m_textures[i]->bind( );
 	}
 }
 
-void StaticMesh::draw(const ShaderProgram& _shader)
+void StaticMesh::draw(const not_null<ShaderProgram>& _shader)
 {
 	bindTextures(_shader);
 	drawBegin( );
@@ -257,7 +256,7 @@ void StaticMesh::draw(const ShaderProgram& _shader)
 
 void StaticMesh::drawBegin( ) noexcept
 {
-	//glPolygonMode(m_faceMode, m_drawMode);
+	glPolygonMode(m_faceMode, m_drawMode);
 	_bindVertexArray(m_vao);
 	glDrawElements(GL_TRIANGLES, m_indices.size( ), GL_UNSIGNED_INT, (const GLvoid*) (0));
 }

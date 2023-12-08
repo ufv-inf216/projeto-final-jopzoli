@@ -1,33 +1,35 @@
 #include "scene.hpp"
 
 Scene::Scene(Game* _game)
-	: m_actors{ singleton_memory::getPool( ) }
+	: Object{ },
+	actors{ singleton_memory::getAssynchronousPool( ) },
+	game{ _game },
+	m_status{ Inactive }
 { }
 
-void Scene::addActor(const not_null<Actor>& _actor)
+void Scene::play( ) noexcept
 {
-	const std::type_index typeId = typeid(*_actor);
-	auto it = m_actors.find(typeId);
-	if (it == m_actors.end( ))
-	{
-		const auto& [itr, valid] = m_actors.insert(std::make_pair(
-			typeId,
-			std::pmr::vector<object_ptr<Actor>>{ singleton_memory::getPool( ) })
-		);
-		if (valid)
-			it = itr;
-	}
-
-	it->second.push_back(_actor.get( ));
+	m_status = Active;
+	onPlay( );
 }
 
-void Scene::removeActor(const not_null<Actor>& _actor)
+void Scene::pause( ) noexcept
 {
-	const std::type_index typeId = typeid(*_actor);
-	auto it = m_actors.find(typeId);
-	if (it != m_actors.end( ))
+	m_status = Inactive;
+	onPause( );
+}
+
+void Scene::tick(float _deltaTime)
+{
+	if (m_status == Active)
 	{
-		auto col = it->second;
-		col.erase(std::find(col.begin( ), col.end( ), object_ptr{ _actor.get( ) }));
+		tickScene(_deltaTime);
+		_tickActors(_deltaTime);
 	}
+}
+
+void Scene::_tickActors(float _deltaTime)
+{
+	for (auto& [name, actor] : actors)
+		actor->tick(_deltaTime);
 }

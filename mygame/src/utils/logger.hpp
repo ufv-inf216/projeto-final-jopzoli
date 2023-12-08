@@ -41,38 +41,44 @@ public:
 	}
 
 	template <typename _Ty>
-	static void i(const _Ty& _e)
+	static void info(const _Ty& _e)
 	{
 		for (auto& i : instances)
-			i.info(_e);
+			i.i(_e);
 	}
 
 	template <typename _Ty>
-	static void w(const _Ty& _e)
+	static void warn(const _Ty& _e)
 	{
 		for (auto& i : instances)
-			i.warn(_e);
+			i.w(_e);
 	}
 
 	template <typename _Ty>
-	static void d(const _Ty& _e)
+	static void debug(const _Ty& _e)
 	{
 		for (auto& i : instances)
-			i.debug(_e);
+			i.d(_e);
 	}
 
 	template <typename _Ty>
-	static void e(const _Ty& _e)
+	static void error(const _Ty& _e)
 	{
 		for (auto& i : instances)
-			i.error(_e);
+			i.e(_e);
 	}
 
 	template <typename _Ty>
-	static void l(const _Ty& _e)
+	static void log(const _Ty& _e)
 	{
 		for (auto& i : instances)
-			i.log(_e);
+			i.l(_e);
+	}
+
+	static void flush( )
+	{
+		for (auto& i : instances)
+			i.m_ostream.flush( );
 	}
 
 	Logger(
@@ -84,18 +90,13 @@ public:
 		const char* _logHdr = LOGGER_LOG_HDRC
 	);
 
-	void flush( )
-	{
-		m_ostream.flush( );
-	}
-
 	void setLevel(Level _level)
 	{
 		m_level = _level;
 	}
 
 	template <typename _Ty>
-	Logger& info(const _Ty& _e)
+	Logger& i(const _Ty& _e)
 	{
 		if (m_level <= Info)
 			m_ostream << "[ " << m_infoHdr << _getTime() << " ]: " << _e << '\n';
@@ -104,7 +105,7 @@ public:
 	}
 
 	template <typename _Ty>
-	Logger& warn(const _Ty& _e)
+	Logger& w(const _Ty& _e)
 	{
 		if (m_level <= Warn)
 			m_ostream << "[ " << m_warnHdr << _getTime( ) << " ]: "  << _e << '\n';
@@ -113,7 +114,7 @@ public:
 	}
 
 	template <typename _Ty>
-	Logger& debug(const _Ty& _e)
+	Logger& d(const _Ty& _e)
 	{
 		if (m_level <= Debug)
 			m_ostream << "[ " << m_debugHdr << _getTime( ) << " ]: "  << _e << '\n';
@@ -122,7 +123,7 @@ public:
 	}
 
 	template <typename _Ty>
-	Logger& error(const _Ty& _e)
+	Logger& e(const _Ty& _e)
 	{
 		if (m_level <= Error)
 			m_ostream << "[ " << m_errorHdr << _getTime( ) << " ]: "  << _e << '\n';
@@ -131,7 +132,7 @@ public:
 	}
 
 	template <typename _Ty>
-	Logger& log(const _Ty& _e)
+	Logger& l(const _Ty& _e)
 	{
 		if (m_level <= Log)
 			m_ostream << "[ " << m_logHdr << _getTime( ) << " ]: "  << _e << '\n';

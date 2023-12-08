@@ -9,8 +9,9 @@
 #include "utils/asserts.hpp"
 #include <algorithm>
 #include <cmath>
-#include <glm/gtc/quaternion.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <iostream>
 #include <limits>
@@ -59,6 +60,14 @@ using glm::dmat4x3;
 using glm::dmat4x4;
 
 using glm::quat;
+
+constexpr double Pi = 3.14159265358979323846;
+constexpr double PiO2 = 1.57079632679489661923;
+constexpr double PiO4 = 0.785398163397448309616;
+constexpr double OnePi = 0.318309886183790671538;
+constexpr double TwoOPi = 0.636619772367581343076;
+constexpr double Sqrt2 = 1.41421356237309504880;
+constexpr double OneOSqrt2 = 0.707106781186547524401;
 
 template <glm::length_t _Size, typename _Ty, glm::qualifier _QlyTy>
 std::ostream& operator<<(std::ostream& _lhs, const glm::vec<_Size, _Ty, _QlyTy>& _rhs)

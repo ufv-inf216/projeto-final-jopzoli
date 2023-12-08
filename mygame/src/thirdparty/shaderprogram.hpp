@@ -5,6 +5,7 @@
 #pragma once
 
 #include "math/math.hpp"
+#include "object/object.hpp"
 #include "thirdparty.hpp"
 #include "utils/exception.hpp"
 #include <vector>
@@ -25,6 +26,12 @@ struct variable_info
 struct attrib_info : variable_info { };
 
 struct uniform_info : variable_info { };
+
+struct lightSource
+{
+	vec3 pos;
+	vec3 color;
+};
 
 class ProgramShaderException
 	: public std::exception
@@ -54,9 +61,12 @@ public:
 };
 
 class ShaderProgram
+	: public Object
 {
 public:
-	NODISCARD static ShaderProgram create(
+	OBJIMPL( );
+
+	NODISCARDRAWPTR static ShaderProgram* create(
 		const std::string_view& _vertexShaderSrc,
 		const std::string_view& _fragmentShaderSrc);
 
@@ -65,11 +75,6 @@ public:
 	static void xLinkError(const std::string_view& _msg);
 
 	ShaderProgram(GLuint _programId) noexcept;
-
-	ShaderProgram(const ShaderProgram&) = delete;
-	ShaderProgram& operator=(const ShaderProgram&) = delete;
-	ShaderProgram(ShaderProgram&&) = delete;
-	ShaderProgram& operator=(ShaderProgram&&) = delete;
 
 	NODISCARD program_id_t programId( ) const noexcept;
 
@@ -164,3 +169,4 @@ private:
 	size_t _getActiveUniformCount( ) const noexcept;
 	uniform_info _getActiveUniformInfo(GLuint _idx) const noexcept;
 };
+OBJDECL(ShaderProgram, Object);

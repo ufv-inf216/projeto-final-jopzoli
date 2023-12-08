@@ -5,6 +5,7 @@
 #pragma once
 
 #include "math/math.hpp"
+#include "object/object.hpp"
 #include "shaderprogram.hpp"
 #include "thirdparty.hpp"
 
@@ -27,9 +28,12 @@ struct vertex
 };
 
 class Texture
+	: public Object
 {
 	friend class StaticMesh;
 public:
+	OBJIMPL( );
+
 	enum Format
 		: GLenum
 	{
@@ -47,7 +51,7 @@ public:
 		Height
 	};
 
-	NODISCARD static Texture create(
+	NODISCARD static Texture* create(
 		const byte_t* _data,
 		size_t _width,
 		size_t _height,
@@ -84,11 +88,15 @@ private:
 		GLsizei _height);
 	static void _setTextureParameters( ) noexcept;
 };
+OBJDECL(Texture, Object);
 
 class StaticMesh
+	: public Object
 {
 	friend class ModelLoader;
 public:
+	OBJIMPL( );
+
 	enum FaceMode
 		: GLenum
 	{
@@ -105,15 +113,15 @@ public:
 		Fill = GL_FILL,
 	};
 
-	NODISCARD static StaticMesh create(
+	NODISCARDRAWPTR static StaticMesh* create(
 		const std::pmr::vector<vertex>& _vertices,
 		const std::pmr::vector<vertex_id_t>& _indices,
-		const std::pmr::vector<Texture>& _textures);
+		const std::pmr::vector<object_ptr<Texture>>& _textures);
 
 	StaticMesh(
 		const std::pmr::vector<vertex>& _vertices,
 		const std::pmr::vector<vertex_id_t>& _indices,
-		const std::pmr::vector<Texture>& _textures,
+		const std::pmr::vector<object_ptr<Texture>>& _textures,
 		vo_id_t _vao,
 		bo_id_t _vbo,
 		bo_id_t _ebo);
@@ -122,7 +130,7 @@ public:
 
 	NODISCARD const std::pmr::vector<vertex_id_t> indices( ) const noexcept;
 
-	NODISCARD const std::pmr::vector<Texture> textures( ) const noexcept;
+	NODISCARD const std::pmr::vector<object_ptr<Texture>> textures( ) const noexcept;
 
 	NODISCARD vo_id_t vao( ) const noexcept;
 
@@ -136,9 +144,9 @@ public:
 
 	void setDrawMode(DrawMode _mode) noexcept;
 	
-	void bindTextures(const ShaderProgram& _shader);
+	void bindTextures(const not_null<ShaderProgram>& _shader);
 
-	void draw(const ShaderProgram& _shader);
+	void draw(const not_null<ShaderProgram>& _shader);
 
 	void drawBegin( ) noexcept;
 
@@ -147,7 +155,7 @@ public:
 private:
 	std::pmr::vector<vertex> m_vertices;
 	std::pmr::vector<vertex_id_t> m_indices;
-	std::pmr::vector<Texture> m_textures;
+	std::pmr::vector<object_ptr<Texture>> m_textures;
 	vo_id_t m_vao;
 	bo_id_t m_vbo;
 	bo_id_t m_ebo;
@@ -170,3 +178,4 @@ private:
 		GLsizei _stride,
 		const GLvoid* _offset) noexcept;
 };
+OBJDECL(StaticMesh, Object);

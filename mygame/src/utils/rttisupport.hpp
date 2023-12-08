@@ -74,7 +74,9 @@ struct rttype_data_filler<_BaseTy>
 	template <typename _Ty>
 	typeid_t fillBase(ptrdiff_t _bOffset) noexcept
 	{
-		const rttype_data_proxy<_BaseTy>* baseData = rawCast<const rttype_data_proxy<_BaseTy>>(rttype_info_proxy<_BaseTy>::get( )->getTypeDataHead( ));
+		const rttype_data_proxy<_BaseTy>* baseData
+			= rawCast<const rttype_data_proxy<_BaseTy>>(
+				rttype_info_proxy<_BaseTy>::get( )->getTypeDataHead( ));
 		typeid_t headSize = baseData->size;
 		const byte_t* data = baseData->getData( );
 		size_t nSize = baseData->size * sizeof(typeid_t);
@@ -277,7 +279,6 @@ NODISCARD ALWAYSINLINE const rttype_info& rtti_type_info(const _Ty&) noexcept
 template <typename _Ty>
 NODISCARD ALWAYSINLINE typeid_t rtti_typeid( ) noexcept
 {
-	// NOTE: sanity check
 	_WARNING(detail::getTypeInfo<_Ty>( )->getTypeID( ) == detail::generateID<_Ty>( ),
 		"wrong typeid generated for given type might be result of inapropriate object declaration");
 

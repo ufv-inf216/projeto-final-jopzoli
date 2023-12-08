@@ -6,7 +6,6 @@
 
 #include "component.hpp"
 #include "math/math.hpp"
-#include <glm/gtx/quaternion.hpp>
 
 class SceneComponent
 	: public Component
@@ -18,6 +17,8 @@ public:
 	quat rotation;
 	vec3 scale;
 
-	SceneComponent( ) noexcept { }
+	SceneComponent( ) noexcept;
+
+	NODISCARD mat4 modelMatrix(mat4 _mat = mat4{ 1.f }) const noexcept;
 };
 OBJDECL(SceneComponent, Component);

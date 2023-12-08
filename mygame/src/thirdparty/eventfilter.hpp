@@ -17,24 +17,43 @@ struct event_trigger
 		Passed,
 	};
 
-	const Status status{ Failed };
+	const Status m_status{ Failed };
 
 	template <typename _FnTy, typename... _Args>
 	void then(_FnTy _fn, _Args&&... _args)
 	{
-		switch (status)
-		{
-		case Passed:
-		{
+		if (m_status == Passed)
 			std::invoke(_fn, std::forward<_Args>(_args)...);
-			break;
-		}
-		default:
-			break;
-		}
 	}
 };
 
+struct keyboard_event_trigger
+	: event_trigger
+{
+	enum Type
+	{
+		KeyDown = SDL_KEYDOWN,
+		KeyUp = SDL_KEYUP,
+	};
+
+	static const uint8_t* keyState;
+
+	static keyboard_event_trigger when(
+		const SDL_KeyboardEvent& _e,
+		Type _type,
+		SDL_Keycode _keyCode,
+		Uint32 _mod = KMOD_NONE,
+		bool _repeat = false);
+};
+
+struct window_event_trigger
+	: event_trigger
+{
+	static window_event_trigger when(
+		const SDL_WindowEvent& _e,
+		SDL_WindowEventID _type
+	);
+};
 class EventFilter
 {
 public:
@@ -72,39 +91,16 @@ public:
 
 	bool sendEvents( );
 
-	bool registerHandler(EventType _type, std::function<void(SDL_Event&)> _handler);
+	void enableHandler(EventType _type);
 
-	inline void unregisterHandler(EventType _type) noexcept;
+	void disableHandler(EventType _type);
 
-	inline void unregisterAllHandlers( ) noexcept;
+	void registerHandler(EventType _type, std::function<void(SDL_Event&)> _handler);
 
-	bool omitEvent(EventType _type);
+	void unregisterHandler(EventType _type) noexcept;
+
+	void unregisterAllHandlers( ) noexcept;
 
 private:
-	std::pmr::map<EventType, std::pair<bool, std::function<void(SDL_Event&)>>> m_handlers;
-};
-
-struct keyboard_event_trigger
-	: event_trigger
-{
-	static keyboard_event_trigger whenKeyDown(
-		const SDL_KeyboardEvent& _e,
-		SDL_Keycode _keyCode,
-		Uint32 _mod = KMOD_NONE,
-		bool _repeat = false) /*noexcept*/;
-
-	static keyboard_event_trigger whenKeyUp(
-		const SDL_KeyboardEvent& _e,
-		SDL_Keycode _keyCode,
-		Uint32 _mod = KMOD_NONE,
-		bool _repeat = false) /*noexcept*/;
-};
-
-struct window_event_trigger
-	: event_trigger
-{
-	static window_event_trigger when(
-		const SDL_WindowEvent& _e,
-		SDL_WindowEventID _type
-	);
+	std::pmr::multimap<EventType, std::pair<bool, std::function<void(SDL_Event&)>>> m_handlers;
 };

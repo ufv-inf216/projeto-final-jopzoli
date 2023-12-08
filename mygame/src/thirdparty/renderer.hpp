@@ -5,6 +5,8 @@
 #pragma once
 
 #include "thirdparty.hpp"
+#include "math/math.hpp"
+#include "shaderprogram.hpp"
 #include <string_view>
 #include <vector>
 
@@ -32,6 +34,35 @@ public:
 		FocusMouse = SDL_WINDOW_MOUSE_FOCUS,
 		Centered = 0x40000000,
 	};
+
+	struct display_info
+	{
+		int index;
+		SDL_Rect resolution;
+		uint32_t frameRate;
+	};
+
+	static Renderer* current;
+
+	static Renderer* getCurrent( ) noexcept
+	{
+		_EXPECTS(current, "no current renderer was set");
+		return current;
+	}
+
+	static ShaderProgram* getCurrentShader( ) noexcept
+	{
+		_EXPECTS(getCurrent( )->shader, "no current shader was set");
+		return getCurrent()->shader.get( );
+	}
+
+	static void setPerspectiveMatrix(mat4 _matrix) noexcept;
+
+	static void setViewMatrix(mat4 _matrix) noexcept;
+
+	static void setModelMatrix(mat4 _matrix) noexcept;
+
+	object_ptr<ShaderProgram> shader;
 
 	Renderer( ) noexcept;
 
@@ -64,19 +95,23 @@ public:
 
 	Flags windowFlags( ) const noexcept;
 
-	bool setWindowFullscreen(Flags _flag = None) const noexcept;
-
-	void setWindowShown( ) const noexcept;
-
-	void setWindowHidden( ) const noexcept;
-
 	int windowHeight( ) const noexcept;
 
 	int windowWidth( ) const noexcept;
 
 	const SDL_Rect windowRect( ) const noexcept;
 
-	void draw( );
+	const display_info displayInfo( ) const noexcept;
+
+	bool setWindowFullscreen(Flags _flag = None) const noexcept;
+
+	void setWindowShown( ) const noexcept;
+
+	void setWindowHidden( ) const noexcept;
+
+	void beginDraw( );
+
+	void endDraw( );
 
 private:
 	SDL_GLContext m_glContext;
